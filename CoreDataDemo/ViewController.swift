@@ -37,10 +37,17 @@ class ViewController: UIViewController {
             PersistanceHelper.shared.saveOrUpdate(user: user)
         }
 
-        PersistanceHelper.shared.filter(by: "Pera")
+//        PersistanceHelper.shared.filter(by: "Pera")
 //        PersistanceHelper.shared.fetchUser(forId: "15")
 //        PersistanceHelper.shared.fetchUsers()
 //        PersistanceHelper.shared.dropDB()
+
+//        PersistanceHelper.shared.deleteUser(userId: "17")
+
+        let user = UserModel(id: "17", username: "Gaja update", password: "ddd", age: "12", pets: pets)
+//        PersistanceHelper.shared.update(user: user)
+
+        PersistanceHelper.shared.save(user: user)
 
     }
 }
