@@ -1,7 +1,6 @@
 import UIKit
 import CoreData
 
-
 class PersistanceHelper {
 
     static var shared = PersistanceHelper()
@@ -38,12 +37,7 @@ class PersistanceHelper {
             print("Fetch Failed: \(error)")
         }
 
-        do {
-            try context.save()
-        } catch {
-            print("Failed saving: \(error)")
-        }
-
+        appDelegate.saveContext()
     }
 
     func update(user: UserModel) {
@@ -80,11 +74,7 @@ class PersistanceHelper {
             print("Fetch Failed: \(error)")
         }
 
-        do {
-            try context.save()
-        } catch {
-            print("Failed saving: \(error)")
-        }
+        appDelegate.saveContext()
     }
 
     func saverOrUpdate(users: [UserModel]) {
@@ -146,11 +136,7 @@ class PersistanceHelper {
             print("Fetch Failed: \(error)")
         }
 
-        do {
-            try context.save()
-        } catch {
-            print("Failed saving: \(error)")
-        }
+        appDelegate.saveContext()
     }
 
     func fetchUsers() {
@@ -279,8 +265,6 @@ class PersistanceHelper {
         } catch {
             print("fetchUser Failed: \(error)")
         }
-
-
     }
 
     func deleteUser(userId: String) {
@@ -316,13 +300,6 @@ class PersistanceHelper {
             print("fetchUser Failed: \(error)")
         }
 
-
-        do {
-            try context.save()
-        } catch {
-            print("Failed saving: \(error)")
-        }
-
+        appDelegate.saveContext()
     }
-
 }

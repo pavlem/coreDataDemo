@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		6F73220D257E40EE000D32A8 /* CoreDataDemo.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 6F73220B257E40EE000D32A8 /* CoreDataDemo.xcdatamodeld */; };
+		6F82E70A257FC1B400310103 /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F82E708257FC1B400310103 /* Article.swift */; };
+		6F82E70B257FC1B400310103 /* catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 6F82E709257FC1B400310103 /* catalog.json */; };
 		6F936F66257E75D90092846E /* PersistanceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F936F65257E75D90092846E /* PersistanceHelper.swift */; };
 		6FBD0000257E63480047E78C /* UserCD+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBDFFFE257E63480047E78C /* UserCD+CoreDataClass.swift */; };
 		6FBD0001257E63480047E78C /* UserCD+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBDFFFF257E63480047E78C /* UserCD+CoreDataProperties.swift */; };
@@ -20,6 +22,8 @@
 
 /* Begin PBXFileReference section */
 		6F73220C257E40EE000D32A8 /* CoreDataDemo.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataDemo.xcdatamodel; sourceTree = "<group>"; };
+		6F82E708257FC1B400310103 /* Article.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
+		6F82E709257FC1B400310103 /* catalog.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = catalog.json; sourceTree = "<group>"; };
 		6F936F65257E75D90092846E /* PersistanceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistanceHelper.swift; sourceTree = "<group>"; };
 		6FBDFFFE257E63480047E78C /* UserCD+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserCD+CoreDataClass.swift"; sourceTree = "<group>"; };
 		6FBDFFFF257E63480047E78C /* UserCD+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserCD+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -43,6 +47,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6F82E700257FBE9900310103 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				9B71A4251F9BE73000E8ADE6 /* Info.plist */,
+				9B71A4201F9BE73000E8ADE6 /* Assets.xcassets */,
+				9B71A4221F9BE73000E8ADE6 /* LaunchScreen.storyboard */,
+				9B71A41A1F9BE73000E8ADE6 /* Main.storyboard */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		6F82E707257FC1A900310103 /* AB */ = {
+			isa = PBXGroup;
+			children = (
+				6F82E708257FC1B400310103 /* Article.swift */,
+				6F82E709257FC1B400310103 /* catalog.json */,
+			);
+			path = AB;
+			sourceTree = "<group>";
+		};
 		9B71A40A1F9BE73000E8ADE6 = {
 			isa = PBXGroup;
 			children = (
@@ -62,13 +86,11 @@
 		9B71A4151F9BE73000E8ADE6 /* CoreDataDemo */ = {
 			isa = PBXGroup;
 			children = (
+				6F82E707257FC1A900310103 /* AB */,
+				6F82E700257FBE9900310103 /* App */,
 				9B71A4161F9BE73000E8ADE6 /* AppDelegate.swift */,
 				9B71A4181F9BE73000E8ADE6 /* ViewController.swift */,
 				6F936F65257E75D90092846E /* PersistanceHelper.swift */,
-				9B71A41A1F9BE73000E8ADE6 /* Main.storyboard */,
-				9B71A4201F9BE73000E8ADE6 /* Assets.xcassets */,
-				9B71A4221F9BE73000E8ADE6 /* LaunchScreen.storyboard */,
-				9B71A4251F9BE73000E8ADE6 /* Info.plist */,
 				6F73220B257E40EE000D32A8 /* CoreDataDemo.xcdatamodeld */,
 				6FBDFFFE257E63480047E78C /* UserCD+CoreDataClass.swift */,
 				6FBDFFFF257E63480047E78C /* UserCD+CoreDataProperties.swift */,
@@ -136,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B71A4241F9BE73000E8ADE6 /* LaunchScreen.storyboard in Resources */,
+				6F82E70B257FC1B400310103 /* catalog.json in Resources */,
 				9B71A4211F9BE73000E8ADE6 /* Assets.xcassets in Resources */,
 				9B71A41C1F9BE73000E8ADE6 /* Main.storyboard in Resources */,
 			);
@@ -152,6 +175,7 @@
 				6F73220D257E40EE000D32A8 /* CoreDataDemo.xcdatamodeld in Sources */,
 				9B71A4171F9BE73000E8ADE6 /* AppDelegate.swift in Sources */,
 				6FBD0001257E63480047E78C /* UserCD+CoreDataProperties.swift in Sources */,
+				6F82E70A257FC1B400310103 /* Article.swift in Sources */,
 				6FBD0000257E63480047E78C /* UserCD+CoreDataClass.swift in Sources */,
 				6F936F66257E75D90092846E /* PersistanceHelper.swift in Sources */,
 			);
@@ -291,7 +315,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = CoreDataDemo/Info.plist;
+				INFOPLIST_FILE = CoreDataDemo/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = shashi.CoreDataDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -305,7 +329,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = CoreDataDemo/Info.plist;
+				INFOPLIST_FILE = CoreDataDemo/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = shashi.CoreDataDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
