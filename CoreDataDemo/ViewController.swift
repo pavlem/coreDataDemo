@@ -33,9 +33,11 @@ class ViewController: UIViewController {
 
         //AppDelegate
         //======================================
-        for user in usersLocal {
-            PersistanceHelper.shared.saveOrUpdate(user: user)
-        }
+//        for user in usersLocal {
+//            PersistanceHelper.shared.saveOrUpdate(user: user)
+//        }
+
+//        PersistanceHelper.shared.saverOrUpdate(users: usersLocal)
 
 //        PersistanceHelper.shared.filter(by: "Pera")
 //        PersistanceHelper.shared.fetchUser(forId: "15")
@@ -44,11 +46,9 @@ class ViewController: UIViewController {
 
 //        PersistanceHelper.shared.deleteUser(userId: "17")
 
-        let user = UserModel(id: "17", username: "Gaja update", password: "ddd", age: "12", pets: pets)
+//        let user = UserModel(id: "16", username: "Gaja update", password: "ddd", age: "12", pets: pets)
 //        PersistanceHelper.shared.update(user: user)
-
-        PersistanceHelper.shared.save(user: user)
-
+//        PersistanceHelper.shared.save(user: user)
     }
 }
 

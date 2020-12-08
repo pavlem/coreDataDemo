@@ -87,6 +87,11 @@ class PersistanceHelper {
         }
     }
 
+    func saverOrUpdate(users: [UserModel]) {
+        for user in users {
+            saveOrUpdate(user: user)
+        }
+    }
 
     func saveOrUpdate(user: UserModel) {
 
