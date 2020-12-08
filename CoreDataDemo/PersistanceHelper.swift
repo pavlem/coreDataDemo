@@ -1,14 +1,65 @@
 import UIKit
 import CoreData
 
+enum PersistanceError: Error {
+    case persistance(error: Error)
+    case internalReason
+}
+
+
 class PersistanceHelper {
 
     static var shared = PersistanceHelper()
 
+    // MARK: - Core Data stack
+    lazy var persistentContainer: NSPersistentContainer = {
+        /*
+         The persistent container for the application. This implementation
+         creates and returns a container, having loaded the store for the
+         application to it. This property is optional since there are legitimate
+         error conditions that could cause the creation of the store to fail.
+        */
+        let container = NSPersistentContainer(name: "CoreDataDemo")
+
+        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+            if let error = error as NSError? {
+                // Replace this implementation with code to handle the error appropriately.
+                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+
+                /*
+                 Typical reasons for an error here include:
+                 * The parent directory does not exist, cannot be created, or disallows writing.
+                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
+                 * The device is out of space.
+                 * The store could not be migrated to the current model version.
+                 Check the error message to determine what the actual problem was.
+                 */
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        })
+        return container
+    }()
+
+    // MARK: - Core Data Saving support
+    func saveContext () {
+        let context = persistentContainer.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
+    }
+
+    static let userEntityName = "UserCD"
+
+    // MARK: - API
     func save(user: UserModel) {
-        // Reference to C.D.S
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let container = appDelegate.persistentContainer
+        let container = persistentContainer
         let context = container.viewContext
         let entity = NSEntityDescription.entity(forEntityName: "UserCD", in: context)!
 
@@ -34,18 +85,18 @@ class PersistanceHelper {
                 newUser.pets = petsData
             }
         } catch {
+
+//            PersistanceError.persistance(error: error)
             print("Fetch Failed: \(error)")
         }
 
-        appDelegate.saveContext()
+        saveContext()
     }
 
     func update(user: UserModel) {
-        // Reference to C.D.S
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let container = appDelegate.persistentContainer
+        let container = persistentContainer
         let context = container.viewContext
-        let entity = NSEntityDescription.entity(forEntityName: "UserCD", in: context)!
+        let entity = NSEntityDescription.entity(forEntityName: PersistanceHelper.userEntityName, in: context)!
 
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity.name!)
         fetchRequest.predicate = NSPredicate(format: "userId = \(user.id)")
@@ -71,10 +122,10 @@ class PersistanceHelper {
     //                results[0].setValue(yourValueToBeSet, forKey: "yourCoreDataAttribute")
             }
         } catch {
-            print("Fetch Failed: \(error)")
+            print("Update Failed: \(error)")
         }
 
-        appDelegate.saveContext()
+        saveContext()
     }
 
     func saverOrUpdate(users: [UserModel]) {
@@ -84,17 +135,13 @@ class PersistanceHelper {
     }
 
     func saveOrUpdate(user: UserModel) {
-
-        // Reference to C.D.S
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-
         // NSPersistentContainer
-        let container = appDelegate.persistentContainer
+        let container = persistentContainer
 
         // NSManagedObjectContext
         let context = container.viewContext
 
-        let entity = NSEntityDescription.entity(forEntityName: "UserCD", in: context)!
+        let entity = NSEntityDescription.entity(forEntityName: PersistanceHelper.userEntityName, in: context)!
 
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity.name!)
         fetchRequest.predicate = NSPredicate(format: "userId = \(user.id)")
@@ -133,24 +180,21 @@ class PersistanceHelper {
     //                    let petsReversed = try? JSONDecoder().decode([Pet].self, from: reversePetsData)
             }
         } catch {
-            print("Fetch Failed: \(error)")
+            print("S or U Failed: \(error)")
         }
 
-        appDelegate.saveContext()
+        saveContext()
     }
 
     func fetchUsers() {
 
-        // Reference to C.D.S
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-
         // NSPersistentContainer
-        let container = appDelegate.persistentContainer
+        let container = persistentContainer
 
         // NSManagedObjectContext
         let context = container.viewContext
 
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "UserCD")
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
         request.returnsObjectsAsFaults = false
 
         do {
@@ -174,10 +218,9 @@ class PersistanceHelper {
 
     func fetchUser(forId userId: String) {
 
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
+        let context = persistentContainer.viewContext
 
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "UserCD")
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
         request.predicate = NSPredicate(format: "userId = %@", userId)
         request.returnsObjectsAsFaults = false
 
@@ -202,12 +245,6 @@ class PersistanceHelper {
     func dropDB() {
         let datamodelName = "CoreDataDemo"
         let storeType = "sqlite"
-
-
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let persistentContainer = appDelegate.persistentContainer
-
-
 
         let url: URL = {
             let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(datamodelName).\(storeType)")
@@ -236,11 +273,10 @@ class PersistanceHelper {
 
     func filter(by userName: String) {
 
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
+        let context = persistentContainer.viewContext
 
 
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "UserCD")
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
 //        request.predicate = NSPredicate(format: "username = %@", userName)
 
         request.predicate = NSPredicate(format: "username contains %@", userName)
@@ -263,15 +299,17 @@ class PersistanceHelper {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            print("fetchUser Failed: \(error)")
+            print("filter Failed: \(error)")
         }
     }
 
-    func deleteUser(userId: String) {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
 
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "UserCD")
+
+
+    func deleteUser(userId: String) {
+        let context = persistentContainer.viewContext
+
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
         request.predicate = NSPredicate(format: "userId = %@", userId)
         request.returnsObjectsAsFaults = false
 
@@ -297,9 +335,9 @@ class PersistanceHelper {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            print("fetchUser Failed: \(error)")
+            print("deleteUser Failed: \(error)")
         }
 
-        appDelegate.saveContext()
+        saveContext()
     }
 }

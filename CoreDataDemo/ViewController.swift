@@ -45,7 +45,7 @@ class ViewController: UIViewController {
 
 //        PersistanceHelper.shared.saverOrUpdate(users: usersLocal)
 
-//        PersistanceHelper.shared.filter(by: "Pera")
+        PersistanceHelper.shared.filter(by: "Pera")
 //        PersistanceHelper.shared.fetchUser(forId: "15")
 //        PersistanceHelper.shared.fetchUsers()
 //        PersistanceHelper.shared.dropDB()
