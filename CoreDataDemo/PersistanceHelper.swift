@@ -3,7 +3,16 @@ import CoreData
 
 enum PersistanceError: Error {
     case persistance(error: Error)
-    case internalReason
+    case userExists
+    case userDoesNotExist
+    case usersNotFetched
+    case userNotFound
+}
+
+enum PersistanceResult {
+    case userSaved
+    case userUpdated
+    case usersPersisted
 }
 
 
@@ -41,7 +50,7 @@ class PersistanceHelper {
     }()
 
     // MARK: - Core Data Saving support
-    func saveContext () {
+    func saveContext() {
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {
@@ -58,83 +67,8 @@ class PersistanceHelper {
     static let userEntityName = "UserCD"
 
     // MARK: - API
-    func save(user: UserModel) {
-        let container = persistentContainer
-        let context = container.viewContext
-        let entity = NSEntityDescription.entity(forEntityName: "UserCD", in: context)!
+    func save(user: UserModel, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
 
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity.name!)
-        fetchRequest.predicate = NSPredicate(format: "userId = \(user.id)")
-
-        do {
-            let results = try context.fetch(fetchRequest) as? [UserCD]
-
-            if results?.count != 0 { // At least one was returned
-                print("user exists....")
-
-            } else {
-                print("user created....")
-
-                let newUser = UserCD(entity: entity, insertInto: context)
-                newUser.username = user.username
-                newUser.password = user.password
-                newUser.age = user.age
-                newUser.userId = user.id
-
-                let petsData = try? JSONEncoder().encode(user.pets)
-                newUser.pets = petsData
-            }
-        } catch {
-
-//            PersistanceError.persistance(error: error)
-            print("Fetch Failed: \(error)")
-        }
-
-        saveContext()
-    }
-
-    func update(user: UserModel) {
-        let container = persistentContainer
-        let context = container.viewContext
-        let entity = NSEntityDescription.entity(forEntityName: PersistanceHelper.userEntityName, in: context)!
-
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity.name!)
-        fetchRequest.predicate = NSPredicate(format: "userId = \(user.id)")
-
-        do {
-            let results = try context.fetch(fetchRequest) as? [UserCD]
-
-            if results?.count != 0 { // At least one was returned
-
-                // NSManagedObject
-                // property approach
-                let oldUser = results?[0]
-                oldUser?.username = user.username
-                oldUser?.password = user.password
-                oldUser?.age = user.age
-                oldUser?.userId = user.id
-
-                let petsData = try? JSONEncoder().encode(user.pets)
-                oldUser?.pets = petsData
-
-                // NSManagedObject
-                // KVO approach
-    //                results[0].setValue(yourValueToBeSet, forKey: "yourCoreDataAttribute")
-            }
-        } catch {
-            print("Update Failed: \(error)")
-        }
-
-        saveContext()
-    }
-
-    func saverOrUpdate(users: [UserModel]) {
-        for user in users {
-            saveOrUpdate(user: user)
-        }
-    }
-
-    func saveOrUpdate(user: UserModel) {
         // NSPersistentContainer
         let container = persistentContainer
 
@@ -148,45 +82,137 @@ class PersistanceHelper {
 
         do {
             let results = try context.fetch(fetchRequest) as? [UserCD]
-
-            if results?.count != 0 { // At least one was returned
-
-                // NSManagedObject
-                // property approach
-                let oldUser = results?[0]
-                oldUser?.username = user.username
-                oldUser?.password = user.password
-                oldUser?.age = user.age
-                oldUser?.userId = user.id
-
-                let petsData = try? JSONEncoder().encode(user.pets)
-                oldUser?.pets = petsData
-
-                // NSManagedObject
-                // KVO approach
-    //                results[0].setValue(yourValueToBeSet, forKey: "yourCoreDataAttribute")
-
-            } else {
-                let newUser = UserCD(entity: entity, insertInto: context)
-                newUser.username = user.username
-                newUser.password = user.password
-                newUser.age = user.age
-                newUser.userId = user.id
-
-                let petsData = try? JSONEncoder().encode(user.pets)
-                newUser.pets = petsData
-
-    //                    let reversePetsData = newUser.pets!
-    //                    let petsReversed = try? JSONDecoder().decode([Pet].self, from: reversePetsData)
+            
+            guard results?.count == 0 else {
+                cb(.failure(PersistanceError.userExists))
+                return
             }
+
+            let newUser = UserCD(entity: entity, insertInto: context)
+            newUser.username = user.username
+            newUser.password = user.password
+            newUser.age = user.age
+            newUser.userId = user.id
+
+            let petsData = try? JSONEncoder().encode(user.pets)
+            newUser.pets = petsData
+
         } catch {
-            print("S or U Failed: \(error)")
+            cb(.failure(PersistanceError.persistance(error: error)))
+            return
         }
 
-        saveContext()
+        if context.hasChanges {
+            do {
+                try context.save()
+                cb(.success(.userSaved))
+            } catch {
+                cb(.failure(PersistanceError.persistance(error: error)))
+            }
+        }
     }
 
-    func fetchUsers() {
+    func update(user: UserModel, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+
+        let container = persistentContainer
+        let context = container.viewContext
+        let entity = NSEntityDescription.entity(forEntityName: PersistanceHelper.userEntityName, in: context)!
+
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity.name!)
+        fetchRequest.predicate = NSPredicate(format: "userId = \(user.id)")
+
+        do {
+            let results = try context.fetch(fetchRequest) as? [UserCD]
+
+            guard results?.count != 0 else {
+                cb(.failure(PersistanceError.userDoesNotExist))
+                return
+            }
+
+            // NSManagedObject
+            // property approach
+            let oldUser = results?[0]
+            oldUser?.username = user.username
+            oldUser?.password = user.password
+            oldUser?.age = user.age
+            oldUser?.userId = user.id
+
+            let petsData = try? JSONEncoder().encode(user.pets)
+            oldUser?.pets = petsData
+
+            // NSManagedObject
+            // KVO approach
+//                results[0].setValue(yourValueToBeSet, forKey: "yourCoreDataAttribute")
+
+        } catch {
+            cb(.failure(PersistanceError.persistance(error: error)))
+            return
+        }
+
+        if context.hasChanges {
+            do {
+                try context.save()
+                cb(.success(.userUpdated))
+            } catch {
+                cb(.failure(PersistanceError.persistance(error: error)))
+            }
+        }
+    }
+
+    func saverOrUpdate(users: [UserModel], cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+
+        for user in users {
+            saveOrUpdate(user: user) { (result) in
+                switch result {
+                case .failure(let err):
+                    cb(.failure(err))
+                    return
+                case .success(_):
+                    print("saverOrUpdate success")
+                }
+            }
+        }
+
+        cb(.success(.usersPersisted))
+    }
+
+    func saveOrUpdate(user: UserModel, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+        // NSPersistentContainer
+        let container = persistentContainer
+
+        // NSManagedObjectContext
+        let context = container.viewContext
+
+        let entity = NSEntityDescription.entity(forEntityName: PersistanceHelper.userEntityName, in: context)!
+
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity.name!)
+        fetchRequest.predicate = NSPredicate(format: "userId = \(user.id)")
+
+
+        do {
+            let results = try context.fetch(fetchRequest) as? [UserCD]
+
+            guard results?.count != 0 else {
+
+                save(user: user) { (result) in
+                    cb(result)
+                }
+    //                    let reversePetsData = newUser.pets!
+    //                    let petsReversed = try? JSONDecoder().decode([Pet].self, from: reversePetsData)
+                return
+            }
+
+            update(user: user) { (result) in
+                cb(result)
+            }
+
+
+        } catch {
+            cb(.failure(PersistanceError.persistance(error: error)))
+        }
+    }
+
+    func fetchUsers(cb: ((Result<[UserModel], PersistanceError>) -> Void)) {
 
         // NSPersistentContainer
         let container = persistentContainer
@@ -199,10 +225,34 @@ class PersistanceHelper {
 
         do {
             // NSManagedObject property approach
+            var users = [UserModel]()
+
             if let resultsUsersCD = try context.fetch(request) as? [UserCD] {
-                for user in resultsUsersCD {
-                    print(user.username ?? "")
+
+                guard resultsUsersCD.count > 0 else {
+
+                    cb(.failure(PersistanceError.usersNotFetched))
+                    return
                 }
+
+                for userCD in resultsUsersCD {
+
+                    let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
+
+                    let userModel = UserModel(
+                        id: userCD.userId ?? "",
+                        username: userCD.username,
+                        password: userCD.password,
+                        age: userCD.age,
+                        pets: pets
+                    )
+                    print(userCD.username ?? "")
+                    users.append(userModel)
+                }
+
+                cb(.success(users))
+            } else {
+                cb(.failure(PersistanceError.usersNotFetched))
             }
 
             // KVO
@@ -213,10 +263,11 @@ class PersistanceHelper {
 
         } catch {
             print("fetchUsers Failed: \(error)")
+            cb(.failure(PersistanceError.persistance(error: error)))
         }
     }
 
-    func fetchUser(forId userId: String) {
+    func fetchUser(forId userId: String, cb: ((Result<UserModel, PersistanceError>) -> Void)) {
 
         let context = persistentContainer.viewContext
 
@@ -226,21 +277,45 @@ class PersistanceHelper {
 
         do {
             let result = try context.fetch(request)
+            guard result.count != 0 else { // At least one was returned
+                cb(.failure(PersistanceError.userNotFound))
+                return
+            }
 
             // NSManagedObject property approach
-            if result.count != 0 { // At least one was returned
-                let userCD = result[0] as! UserCD
-                print(userCD.username ?? "")
-            }
+            let userCD = result[0] as! UserCD
+            print(userCD.username ?? "")
+
+            let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
+
+            let userModel = UserModel(
+                id: userCD.userId ?? "",
+                username: userCD.username,
+                password: userCD.password,
+                age: userCD.age,
+                pets: pets
+            )
+
+            cb(.success(userModel))
 
             // KVO
     //        for data in result as! [NSManagedObject] {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            print("fetchUser Failed: \(error)")
+            cb(.failure(PersistanceError.persistance(error: error)))
         }
     }
+
+
+
+
+
+
+
+
+
+
 
     func dropDB() {
         let datamodelName = "CoreDataDemo"
