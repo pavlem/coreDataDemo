@@ -36,26 +36,49 @@ class ViewController: UIViewController {
 //        let articlesData = try? Data(contentsOf: urlPath)
 //        let articles = try? JSONDecoder().decode([Article].self, from: articlesData!)
 
+        // deleteUser
+        // ===========
+//        PersistanceHelper.shared.deleteUser(userId: "12") { (result) in
+//            switch result {
+//            case .failure(let err):
+//                print(err)
+//            case .success(let state):
+//                print(state)
+//            }
+//        }
 
-        //AppDelegate
-        //======================================
+        // filter
+        // ===========
+//        PersistanceHelper.shared.filter(by: "Paja 1") { (result) in
+//            switch result {
+//            case .failure(let err):
+//                print(err)
+//            case .success(let users):
+//                print(users)
+//            }
+//        }
 
-//        PersistanceHelper.shared.filter(by: "Pera")
-//        PersistanceHelper.shared.dropDB()
-//        PersistanceHelper.shared.deleteUser(userId: "17")
-
-
+        // dropDB
+        // ===========
+//        PersistanceHelper.shared.dropDB { (result) in
+//            switch result {
+//            case .failure(let err):
+//                print(err)
+//            case .success():
+//                print("dropDB OK")
+//            }
+//        }
 
         // fetchUsers users
         // ===========
-        PersistanceHelper.shared.fetchUser(forId: "15") { (result) in
-            switch result {
-            case .failure(let err):
-                print(err)
-            case .success(let user):
-                print(user)
-            }
-        }
+//        PersistanceHelper.shared.fetchUser(forId: "15") { (result) in
+//            switch result {
+//            case .failure(let err):
+//                print(err)
+//            case .success(let user):
+//                print(user)
+//            }
+//        }
 
         // fetchUsers users
         // ===========

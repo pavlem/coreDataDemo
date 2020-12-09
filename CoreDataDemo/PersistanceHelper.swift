@@ -7,12 +7,15 @@ enum PersistanceError: Error {
     case userDoesNotExist
     case usersNotFetched
     case userNotFound
+    case dbNotFound
+    case noUsersFound
 }
 
 enum PersistanceResult {
     case userSaved
     case userUpdated
     case usersPersisted
+    case userDeleted
 }
 
 
@@ -307,32 +310,24 @@ class PersistanceHelper {
         }
     }
 
+    func dropDB(cb: @escaping ((Result<(), PersistanceError>) -> Void)) {
 
-
-
-
-
-
-
-
-
-
-    func dropDB() {
         let datamodelName = "CoreDataDemo"
         let storeType = "sqlite"
 
         let url: URL = {
             let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(datamodelName).\(storeType)")
 
-            assert(FileManager.default.fileExists(atPath: url.path))
-
+            if FileManager.default.fileExists(atPath: url.path) == false {
+                cb(.failure(PersistanceError.dbNotFound))
+            }
             return url
         }()
 
         func loadStores() {
             persistentContainer.loadPersistentStores(completionHandler: { (nsPersistentStoreDescription, error) in
                 if let error = error {
-                    fatalError(error.localizedDescription)
+                    cb(.failure(PersistanceError.persistance(error: error)))
                 }
             })
         }
@@ -344,18 +339,17 @@ class PersistanceHelper {
         }
 
         deleteAndRebuild()
+        cb(.success(()))
     }
 
-    func filter(by userName: String) {
+    func filter(by userName: String, cb: ((Result<[UserModel], PersistanceError>) -> Void)) {
 
         let context = persistentContainer.viewContext
-
 
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
 //        request.predicate = NSPredicate(format: "username = %@", userName)
 
         request.predicate = NSPredicate(format: "username contains %@", userName)
-
         request.returnsObjectsAsFaults = false
 
         do {
@@ -364,9 +358,28 @@ class PersistanceHelper {
             // NSManagedObject property approach
             if result.count != 0 { // At least one was returned
 
-                for user in result as! [UserCD] {
-                    print(user.username ?? "")
+                var usersLo = [UserModel]()
+
+                for userCD in result as! [UserCD] {
+                    print(userCD.username ?? "")
+
+                    let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
+
+                    let userModel = UserModel(
+                        id: userCD.userId ?? "",
+                        username: userCD.username,
+                        password: userCD.password,
+                        age: userCD.age,
+                        pets: pets
+                    )
+
+                    usersLo.append(userModel)
                 }
+
+                cb(.success(usersLo))
+
+            } else {
+                cb(.failure(.noUsersFound))
             }
 
             // KVO
@@ -374,14 +387,12 @@ class PersistanceHelper {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            print("filter Failed: \(error)")
+            cb(.failure(PersistanceError.persistance(error: error)))
         }
     }
 
+    func deleteUser(userId: String, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
 
-
-
-    func deleteUser(userId: String) {
         let context = persistentContainer.viewContext
 
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
@@ -397,12 +408,8 @@ class PersistanceHelper {
                 for object in result {
                     context.delete(object as! NSManagedObject)
                 }
-
-//                let userCD = result[0] as! UserCD
-//                print("user: \(userCD.username ?? "")")
-//                context.delete(userCD)
-//                print("user: \(userCD.username ?? "")")
-//                print("")
+            } else {
+                cb(.failure(.userDoesNotExist))
             }
 
             // KVO
@@ -410,9 +417,18 @@ class PersistanceHelper {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            print("deleteUser Failed: \(error)")
+            cb(.failure(PersistanceError.persistance(error: error)))
         }
 
-        saveContext()
+//        saveContext()
+
+        if context.hasChanges {
+            do {
+                try context.save()
+                cb(.success(.userDeleted))
+            } catch {
+                cb(.failure(PersistanceError.persistance(error: error)))
+            }
+        }
     }
 }
