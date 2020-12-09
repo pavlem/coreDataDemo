@@ -14,6 +14,7 @@
 		6F936F66257E75D90092846E /* PersistanceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F936F65257E75D90092846E /* PersistanceHelper.swift */; };
 		6FBD0000257E63480047E78C /* UserCD+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBDFFFE257E63480047E78C /* UserCD+CoreDataClass.swift */; };
 		6FBD0001257E63480047E78C /* UserCD+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBDFFFF257E63480047E78C /* UserCD+CoreDataProperties.swift */; };
+		6FE5A8772580CED90003EDD9 /* PersistanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE5A8762580CED90003EDD9 /* PersistanceController.swift */; };
 		9B71A4171F9BE73000E8ADE6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B71A4161F9BE73000E8ADE6 /* AppDelegate.swift */; };
 		9B71A4191F9BE73000E8ADE6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B71A4181F9BE73000E8ADE6 /* ViewController.swift */; };
 		9B71A41C1F9BE73000E8ADE6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B71A41A1F9BE73000E8ADE6 /* Main.storyboard */; };
@@ -29,6 +30,7 @@
 		6F936F65257E75D90092846E /* PersistanceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistanceHelper.swift; sourceTree = "<group>"; };
 		6FBDFFFE257E63480047E78C /* UserCD+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserCD+CoreDataClass.swift"; sourceTree = "<group>"; };
 		6FBDFFFF257E63480047E78C /* UserCD+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserCD+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		6FE5A8762580CED90003EDD9 /* PersistanceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistanceController.swift; sourceTree = "<group>"; };
 		9B71A4131F9BE73000E8ADE6 /* CoreDataDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreDataDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B71A4161F9BE73000E8ADE6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B71A4181F9BE73000E8ADE6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 				9B71A4181F9BE73000E8ADE6 /* ViewController.swift */,
 				6F82E70F257FD4E500310103 /* ArticlesVC.swift */,
 				6F936F65257E75D90092846E /* PersistanceHelper.swift */,
+				6FE5A8762580CED90003EDD9 /* PersistanceController.swift */,
 				6F73220B257E40EE000D32A8 /* CoreDataDemo.xcdatamodeld */,
 				6FBDFFFE257E63480047E78C /* UserCD+CoreDataClass.swift */,
 				6FBDFFFF257E63480047E78C /* UserCD+CoreDataProperties.swift */,
@@ -182,6 +185,7 @@
 				6F82E70A257FC1B400310103 /* Article.swift in Sources */,
 				6FBD0000257E63480047E78C /* UserCD+CoreDataClass.swift in Sources */,
 				6F936F66257E75D90092846E /* PersistanceHelper.swift in Sources */,
+				6FE5A8772580CED90003EDD9 /* PersistanceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +259,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -306,7 +310,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -323,7 +327,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = shashi.CoreDataDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -337,7 +341,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = shashi.CoreDataDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

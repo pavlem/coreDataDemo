@@ -1,7 +1,7 @@
 import UIKit
 import CoreData
 
-enum PersistanceError: Error {
+enum PerError: Error {
     case persistance(error: Error)
     case userExists
     case userDoesNotExist
@@ -11,13 +11,12 @@ enum PersistanceError: Error {
     case noUsersFound
 }
 
-enum PersistanceResult {
+enum PerResult {
     case userSaved
     case userUpdated
     case usersPersisted
     case userDeleted
 }
-
 
 class PersistanceHelper {
 
@@ -53,16 +52,18 @@ class PersistanceHelper {
     }()
 
     // MARK: - Core Data Saving support
-    func saveContext() {
+    func saveContext(success: () -> Void, fail: (Error) -> Void) {
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {
                 try context.save()
+                success()
             } catch {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+//                let nserror = error as NSError
+//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                fail(error)
             }
         }
     }
@@ -70,11 +71,9 @@ class PersistanceHelper {
     static let userEntityName = "UserCD"
 
     // MARK: - API
-    func save(user: UserModel, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
-
+    func save(user: UserModel, cb: ((Result<PerResult, PerError>) -> Void)) {
         // NSPersistentContainer
         let container = persistentContainer
-
         // NSManagedObjectContext
         let context = container.viewContext
 
@@ -87,7 +86,7 @@ class PersistanceHelper {
             let results = try context.fetch(fetchRequest) as? [UserCD]
             
             guard results?.count == 0 else {
-                cb(.failure(PersistanceError.userExists))
+                cb(.failure(PerError.userExists))
                 return
             }
 
@@ -101,21 +100,18 @@ class PersistanceHelper {
             newUser.pets = petsData
 
         } catch {
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
             return
         }
 
-        if context.hasChanges {
-            do {
-                try context.save()
-                cb(.success(.userSaved))
-            } catch {
-                cb(.failure(PersistanceError.persistance(error: error)))
-            }
+        saveContext {
+            cb(.success(.userSaved))
+        } fail: { (error) in
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 
-    func update(user: UserModel, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+    func update(user: UserModel, cb: ((Result<PerResult, PerError>) -> Void)) {
 
         let container = persistentContainer
         let context = container.viewContext
@@ -128,12 +124,11 @@ class PersistanceHelper {
             let results = try context.fetch(fetchRequest) as? [UserCD]
 
             guard results?.count != 0 else {
-                cb(.failure(PersistanceError.userDoesNotExist))
+                cb(.failure(PerError.userDoesNotExist))
                 return
             }
 
-            // NSManagedObject
-            // property approach
+            // NSManagedObject - property approach
             let oldUser = results?[0]
             oldUser?.username = user.username
             oldUser?.password = user.password
@@ -148,21 +143,18 @@ class PersistanceHelper {
 //                results[0].setValue(yourValueToBeSet, forKey: "yourCoreDataAttribute")
 
         } catch {
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
             return
         }
 
-        if context.hasChanges {
-            do {
-                try context.save()
-                cb(.success(.userUpdated))
-            } catch {
-                cb(.failure(PersistanceError.persistance(error: error)))
-            }
+        saveContext {
+            cb(.success(.userUpdated))
+        } fail: { (error) in
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 
-    func saverOrUpdate(users: [UserModel], cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+    func saverOrUpdate(users: [UserModel], cb: ((Result<PerResult, PerError>) -> Void)) {
 
         for user in users {
             saveOrUpdate(user: user) { (result) in
@@ -179,7 +171,7 @@ class PersistanceHelper {
         cb(.success(.usersPersisted))
     }
 
-    func saveOrUpdate(user: UserModel, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+    func saveOrUpdate(user: UserModel, cb: ((Result<PerResult, PerError>) -> Void)) {
         // NSPersistentContainer
         let container = persistentContainer
 
@@ -211,11 +203,11 @@ class PersistanceHelper {
 
 
         } catch {
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 
-    func fetchUsers(cb: ((Result<[UserModel], PersistanceError>) -> Void)) {
+    func fetchUsers(cb: ((Result<[UserModel], PerError>) -> Void)) {
 
         // NSPersistentContainer
         let container = persistentContainer
@@ -228,35 +220,30 @@ class PersistanceHelper {
 
         do {
             // NSManagedObject property approach
+
+            guard let resultsUsersCD = try context.fetch(request) as? [UserCD], resultsUsersCD.count > 0 else {
+                cb(.failure(PerError.usersNotFetched))
+                return
+            }
+
             var users = [UserModel]()
 
-            if let resultsUsersCD = try context.fetch(request) as? [UserCD] {
+            for userCD in resultsUsersCD {
 
-                guard resultsUsersCD.count > 0 else {
+                let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
 
-                    cb(.failure(PersistanceError.usersNotFetched))
-                    return
-                }
-
-                for userCD in resultsUsersCD {
-
-                    let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
-
-                    let userModel = UserModel(
-                        id: userCD.userId ?? "",
-                        username: userCD.username,
-                        password: userCD.password,
-                        age: userCD.age,
-                        pets: pets
-                    )
-                    print(userCD.username ?? "")
-                    users.append(userModel)
-                }
-
-                cb(.success(users))
-            } else {
-                cb(.failure(PersistanceError.usersNotFetched))
+                let userModel = UserModel(
+                    id: userCD.userId ?? "",
+                    username: userCD.username,
+                    password: userCD.password,
+                    age: userCD.age,
+                    pets: pets
+                )
+                print(userCD.username ?? "")
+                users.append(userModel)
             }
+
+            cb(.success(users))
 
             // KVO
     //        let result = try context.fetch(request)
@@ -266,11 +253,11 @@ class PersistanceHelper {
 
         } catch {
             print("fetchUsers Failed: \(error)")
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 
-    func fetchUser(forId userId: String, cb: ((Result<UserModel, PersistanceError>) -> Void)) {
+    func fetchUser(forId userId: String, cb: ((Result<UserModel, PerError>) -> Void)) {
 
         let context = persistentContainer.viewContext
 
@@ -281,7 +268,7 @@ class PersistanceHelper {
         do {
             let result = try context.fetch(request)
             guard result.count != 0 else { // At least one was returned
-                cb(.failure(PersistanceError.userNotFound))
+                cb(.failure(PerError.userNotFound))
                 return
             }
 
@@ -306,11 +293,11 @@ class PersistanceHelper {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 
-    func dropDB(cb: @escaping ((Result<(), PersistanceError>) -> Void)) {
+    func dropDB(cb: @escaping ((Result<(), PerError>) -> Void)) {
 
         let datamodelName = "CoreDataDemo"
         let storeType = "sqlite"
@@ -319,7 +306,7 @@ class PersistanceHelper {
             let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(datamodelName).\(storeType)")
 
             if FileManager.default.fileExists(atPath: url.path) == false {
-                cb(.failure(PersistanceError.dbNotFound))
+                cb(.failure(PerError.dbNotFound))
             }
             return url
         }()
@@ -327,7 +314,7 @@ class PersistanceHelper {
         func loadStores() {
             persistentContainer.loadPersistentStores(completionHandler: { (nsPersistentStoreDescription, error) in
                 if let error = error {
-                    cb(.failure(PersistanceError.persistance(error: error)))
+                    cb(.failure(PerError.persistance(error: error)))
                 }
             })
         }
@@ -342,56 +329,49 @@ class PersistanceHelper {
         cb(.success(()))
     }
 
-    func filter(by userName: String, cb: ((Result<[UserModel], PersistanceError>) -> Void)) {
+    func filter(by userName: String, cb: ((Result<[UserModel], PerError>) -> Void)) {
 
         let context = persistentContainer.viewContext
 
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: PersistanceHelper.userEntityName)
-//        request.predicate = NSPredicate(format: "username = %@", userName)
-
         request.predicate = NSPredicate(format: "username contains %@", userName)
         request.returnsObjectsAsFaults = false
 
         do {
-            let result = try context.fetch(request)
-
-            // NSManagedObject property approach
-            if result.count != 0 { // At least one was returned
-
-                var usersLo = [UserModel]()
-
-                for userCD in result as! [UserCD] {
-                    print(userCD.username ?? "")
-
-                    let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
-
-                    let userModel = UserModel(
-                        id: userCD.userId ?? "",
-                        username: userCD.username,
-                        password: userCD.password,
-                        age: userCD.age,
-                        pets: pets
-                    )
-
-                    usersLo.append(userModel)
-                }
-
-                cb(.success(usersLo))
-
-            } else {
+            guard let result = try context.fetch(request) as? [UserCD], result.count != 0 else {
                 cb(.failure(.noUsersFound))
+                return
             }
+
+            var usersLo = [UserModel]()
+
+            for userCD in result {
+
+                let pets = try? JSONDecoder().decode([Pet].self, from: userCD.pets ?? Data())
+
+                let userModel = UserModel(
+                    id: userCD.userId ?? "",
+                    username: userCD.username,
+                    password: userCD.password,
+                    age: userCD.age,
+                    pets: pets
+                )
+
+                usersLo.append(userModel)
+            }
+
+            cb(.success(usersLo))
 
             // KVO
     //        for data in result as! [NSManagedObject] {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 
-    func deleteUser(userId: String, cb: ((Result<PersistanceResult, PersistanceError>) -> Void)) {
+    func deleteUser(userId: String, cb: ((Result<PerResult, PerError>) -> Void)) {
 
         let context = persistentContainer.viewContext
 
@@ -402,14 +382,13 @@ class PersistanceHelper {
         do {
             let result = try context.fetch(request)
 
-            // NSManagedObject property approach
-            if result.count != 0 { // At least one was returned
-
-                for object in result {
-                    context.delete(object as! NSManagedObject)
-                }
-            } else {
+            guard result.count != 0 else {
                 cb(.failure(.userDoesNotExist))
+                return
+            }
+
+            for object in result {
+                context.delete(object as! NSManagedObject)
             }
 
             // KVO
@@ -417,18 +396,13 @@ class PersistanceHelper {
     //           print(data.value(forKey: "username") as! String)
     //        }
         } catch {
-            cb(.failure(PersistanceError.persistance(error: error)))
+            cb(.failure(PerError.persistance(error: error)))
         }
 
-//        saveContext()
-
-        if context.hasChanges {
-            do {
-                try context.save()
-                cb(.success(.userDeleted))
-            } catch {
-                cb(.failure(PersistanceError.persistance(error: error)))
-            }
+        saveContext {
+            cb(.success(.userDeleted))
+        } fail: { (error) in
+            cb(.failure(PerError.persistance(error: error)))
         }
     }
 }

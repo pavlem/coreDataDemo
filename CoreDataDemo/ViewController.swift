@@ -31,10 +31,16 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        let stringPath = Bundle.main.path(forResource: "catalog", ofType: "json")
-//        let urlPath = URL(fileURLWithPath: stringPath!)
-//        let articlesData = try? Data(contentsOf: urlPath)
-//        let articles = try? JSONDecoder().decode([Article].self, from: articlesData!)
+        // saverOrUpdate users
+        // ===========
+//        PersistanceHelper.shared.saverOrUpdate(users: usersLocal) { (result) in
+//            switch result {
+//            case .failure(let err):
+//                print(err)
+//            case .success(let status):
+//                print(status)
+//            }
+//        }
 
         // deleteUser
         // ===========
@@ -49,7 +55,7 @@ class ViewController: UIViewController {
 
         // filter
         // ===========
-//        PersistanceHelper.shared.filter(by: "Paja 1") { (result) in
+//        PersistanceHelper.shared.filter(by: "gaja") { (result) in
 //            switch result {
 //            case .failure(let err):
 //                print(err)
@@ -69,7 +75,7 @@ class ViewController: UIViewController {
 //            }
 //        }
 
-        // fetchUsers users
+        // fetchUser
         // ===========
 //        PersistanceHelper.shared.fetchUser(forId: "15") { (result) in
 //            switch result {
@@ -91,37 +97,39 @@ class ViewController: UIViewController {
 //            }
 //        }
 
-        // saverOrUpdate users
-        // ===========
-//        PersistanceHelper.shared.saverOrUpdate(users: usersLocal) { (result) in
-//            switch result {
-//            case .failure(let err):
-//                print(err)
-//            case .success(let status):
-//                print(status)
-//            }
-//        }
-
         // update user
         // ============
-//        let user = UserModel(id: "18", username: "Gaja update 1122", password: "ddd", age: "12", pets: pets)
+//        let user = UserModel(id: "16", username: "Paja 123", password: "ddd", age: "12", pets: pets)
 //        PersistanceHelper.shared.update(user: user) { (result) in
 //            switch result {
 //            case .failure(let err):
 //                print(err)
-//            case .success(()):
-//                print("update success")
+//            case .success(let perRes):
+//                print(perRes)
 //            }
 //        }
 
         // Save user
         // ============
+//        let user = UserModel(id: "16", username: "Paja 123", password: "ddd", age: "12", pets: pets)
 //        PersistanceHelper.shared.save(user: user) { (result) in
 //            switch result {
 //            case .failure(let err):
 //                print(err)
-//            case .success(()):
-//                print("save success")
+//            case .success(let perResult):
+//                print(perResult)
+//            }
+//        }
+
+        // saveOrUpdate user
+        // ===========
+//        let user = UserModel(id: "17", username: "Paja 1234", password: "ddd", age: "12", pets: pets)
+//        PersistanceHelper.shared.saveOrUpdate(user: user) { (result) in
+//            switch result {
+//            case .failure(let err):
+//                print(err)
+//            case .success(let perResult):
+//                print(perResult)
 //            }
 //        }
     }

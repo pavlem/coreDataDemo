@@ -1,11 +1,3 @@
-//
-//  ArticlesVC.swift
-//  CoreDataDemo
-//
-//  Created by Pavle Mijatovic on 08/12/2020.
-//  Copyright © 2020 Shashikant Jagtap. All rights reserved.
-//
-
 import UIKit
 
 class ArticlesVC: UIViewController {
@@ -13,18 +5,10 @@ class ArticlesVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        let stringPath = Bundle.main.path(forResource: "catalog", ofType: "json")
+        let urlPath = URL(fileURLWithPath: stringPath!)
+        let articlesData = try? Data(contentsOf: urlPath)
+        let articles = try? JSONDecoder().decode([Article].self, from: articlesData!)
+        print(articles)
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
