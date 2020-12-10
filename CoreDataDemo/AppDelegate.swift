@@ -23,8 +23,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
 
         let sb = UIStoryboard(name: "Main", bundle: nil)
-        let vc = sb.instantiateViewController(identifier: "Users_ID")
-//        let vc = sb.instantiateViewController(identifier: "Articles_ID")
+//        let vc = sb.instantiateViewController(identifier: "Users_ID")
+        let vc = sb.instantiateViewController(identifier: "Articles_ID")
         window?.rootViewController = vc
 
         return true

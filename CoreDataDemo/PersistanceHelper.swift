@@ -84,7 +84,7 @@ class PersistanceHelper {
 
         do {
             let results = try context.fetch(fetchRequest) as? [UserCD]
-            
+
             guard results?.count == 0 else {
                 cb(.failure(PerError.userExists))
                 return
